@@ -4,6 +4,7 @@ from sklearn.utils import column_or_1d
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import  FileStorage
 from datetime import datetime
+import random
 # from dtb_functions import *
 
 app = Flask(__name__)
@@ -24,16 +25,18 @@ def upload_files():
    try:
     if request.method == 'POST':
       f = request.files['file']
-      f.save(secure_filename(f.filename))
-
+      task_id=str(random.randint(0, 999999)).zfill(6)
+      while task_id in taskTofile:
+        task_id = str(random.randint(0, 999999)).zfill(6)
+      f.save(secure_filename('./data/' + task_id))
     # prebuilt function
     # conversion of file to csv()
 
     # task_id is created according to time
     # hour[2 digits] min[2 digits] sec[2 digits]
-      task_id=str(datetime.now().time()).replace(':', '')[:6]
-      taskTofile[task_id]=f.filename
-      return f'file uploaded successfully with filename {taskTofile[task_id]} and task id is {task_id}'
+      taskTofile[task_id]=task_id
+      print(taskTofile)
+      return task_id, 200
    except:
     return 'Something wrong occured'
 
