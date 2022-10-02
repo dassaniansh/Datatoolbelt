@@ -8,6 +8,8 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 import xml.etree.ElementTree as ET
 from collections import OrderedDict
+import numpy as np
+from scipy import stats
 
 #### Library Import Ends ####
 #### Backend Stuff - NOT FOR ANSH ####
@@ -101,7 +103,7 @@ def dicRec(dic, output, layer, prev = None):
 #### Meta Data Creation ####
 
 def metaData(csvfile):
-    output = []
+    output = [] #{NAme: , DataType, }
     df = pd.read_csv(csvfile)
     for col in df.columns:
         temp = {}
@@ -208,97 +210,58 @@ def jsonToxml(jsonfile, xmlFile):
 
 #### Data Cleaning ####
 
-def normalization(csvfile, pKey, lower, higher):
-    f = open(csvfile, "r", encoding="utf8")
-    lines = f.readlines()
-    f.close()
-    num = 0
-    for i, _ in enumerate(lines[0]):
-        if lines[0][i] == pKey:
-            num = i
-            break
+def normalization(csvfile, pKey, lower, higher, replace = False):
+    df = pd.read_csv(csvfile)
+    nkey = pKey
+    if replace:
+        pass
+    else:
+        nkey = pKey+"_norm"
+    df[nkey] = df[pKey]/df[pKey].abs().max()
+    df[nkey] = (df[nkey]*(higher-lower)) + lower
 
-    for i in range(1, len(lines)):
-        lines[i][num] = (lines[i][num]*(higher - lower)) + lower
+    df.to_csv(csvfile, encoding='utf-8', index=False)
+    return csvfile
 
-    with open(csvfile, "w", newline="", encoding="utf8") as f:
-        writer = csv.writer(f)
-        writer.writerows(lines)
+def outlier(csvfile, pKey, lower, higher, remove = False):
+    df = pd.read_csv(csvfile)
+    nkey = pKey+"_noOut"
+    res = []
+    for v in df[pKey].iteritems():
+        v = list(v)
+        if v[1] < lower or v[1] > higher:
+            res.append(None)
+        else:
+            res.append(v[1])
+    df[nkey] = res
+
+    if remove:
+        nullValues(csvfile, nkey, 1)
+    else:
+        df.to_csv(csvfile, encoding='utf-8', index=False)
 
     return csvfile
 
-def outlier(csvfile, pKey, lower, higher):
-    f = open(csvfile, "r", encoding="utf8")
-    lines = f.readlines()
-    f.close()
-    num = 0
-    for i, _ in enumerate(lines[0]):
-        if lines[0][i] == pKey:
-            num = i
-            break
-
-    tot = 0
-    for i in range(1, len(lines)):
-        if lines[i][num] > higher or lines[i][num] < lower:
-            tot += 1
-            del lines[i]
-
-
-    with open(csvfile, "w", newline="", encoding="utf8") as f:
-        writer = csv.writer(f)
-        writer.writerows(lines)
-
-    return csvfile, tot
-
 
 def nullValues(csvfile, pKey, method, replacement = None):
-    f = open(csvfile, "r", encoding="utf8")
-    lines = f.readlines()
-    f.close()
-    num = 0
-    for i, _ in enumerate(lines[0]):
-        if lines[0][i] == pKey:
-            num = i
-            break
-
+    df = pd.read_csv(csvfile)
     if method == 1:
-        tot = 0
-        for i in range(1, len(lines)):
-            if lines[i][num] == None or lines[i][num] == "" or lines[i][num] == " ":
-                tot += 1
-                del lines[i]
+        df = df.dropna(subset=[pKey])
     elif method == 2:
-        subs = 0
+        rep = []
         if replacement == "Average":
-            for i in range(1, len(lines)):
-                subs += lines[i][num]
-            if type(lines[1][num]) == int:
-                subs = subs//(len(lines) - 1)
-            elif type(lines[1][num]) == float:
-                subs = subs/(len(lines) - 1)
+            rep = df[pKey].mean()
         elif replacement == "Maximum":
-            for i in range(1, len(lines)):
-                if subs < lines[i][num]:
-                    subs = lines[i][num]
-        elif replacement == "Maximum":
-            subs = sys.maxint
-            for i in range(1, len(lines)):
-                if subs > lines[i][num]:
-                    subs = lines[i][num]
-        else:
-            pass
+            rep = df[pKey].max()
+        elif replacement == "Minimum":
+            rep = df[pKey].min()
 
-        for i in range(1, len(lines)):
-            if lines[i][num] == None or lines[i][num] == "" or lines[i][num] == " ":
-                tot += 1
-                lines[i][num] = subs
+        df[pKey].fillna(value=rep, inplace=True) 
+    else:
+        pass
 
-
-    with open(csvfile, "w", newline="", encoding="utf8") as f:
-        writer = csv.writer(f)
-        writer.writerows(lines)
-
-    return csvfile, tot
+    df.to_csv(csvfile, encoding='utf-8', index=False)
+    return csvfile
 
 #### Data Cleaning Ends ####
 #### Data Visualization ####
@@ -339,14 +302,17 @@ def columnComp(csvfile, graph, colx, cols):
 
 
 #### Testing ####
-"""
-csvfile = "testdata.csv"
+csvfile = "dontDeleteAnsh.csv"
 jsonfile = "testdata.json"
 xmlfile = "testdata.xml"
 
+"""
 metaData(csvfile)
 #csvTojson(csvfile, jsonfile, "ID")
 #jsonToxml(jsonfile, xmlfile)
-#xmlTocsv(xmlfile, csvfile)
+xmlTocsv(xmlfile, csvfile)
+outlier(csvfile, "Age", 21, 21)
+print(nullValues(csvfile, "Age_noOut", 2, "Maximum"))
+
 """
 #### Testing Ends ####
