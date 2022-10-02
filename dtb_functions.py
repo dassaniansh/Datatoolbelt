@@ -43,14 +43,35 @@ def listTodic(lines, primeKey = None):
 
     return output
 
-def dicRec(dic, output, layer, prev = None):
+def dicRec(dic, output, layer, prev = None, pos = []):
+
+    if type(dic) == list:
+        if type(dic[0]) == dict or type(dic[0]) == OrderedDict:
+            for e in dic:
+                output, pos = dicRec(e, output, layer, None, pos)
+            return output, pos
+        elif type(dic[0]) == list:
+            dicRec(dic[0], output, layer, prev, pos)
+        else:
+            return dic, pos
+
     if layer%2 == 0:
         if output == []:
             output.append(list(dic.keys()))
+            pos = [1] * len(output[0])
+            t = [None] * len(output[0])
+            output.append(t)
         else:
             for i in dic.keys():
                 if i not in output[0]:
+                    if type(i) == str:
+                        i = i.replace("\n", " ")
                     output[0].append(i)
+                    pos.append(max(pos))
+                    if max(pos) > len(output):
+                        for z in range(max(pos) - len(output)):
+                            t = [None] * len(output[0])
+                            output.append(t)
 
         for i in dic.keys():
             if type(dic[i]) == OrderedDict:
@@ -58,45 +79,78 @@ def dicRec(dic, output, layer, prev = None):
 
             if type(dic[i]) == dict:
                 newlayer = layer + 1
-                output = dicRec(dic[i], output, newlayer, i)
+                output, pos = dicRec(dic[i], output, newlayer, i, pos)
             else:
                 for k in range(len(output[0])):
                     if output[0][k] == i:
-                        if len(output[0]) > len(output[-1]):
-                            for _ in range(len(output[0])-len(output[-1])):
-                                output[-1].append(None)
-                        
-                        if output[-1][k] == None:
-                            output[-1][k] = dic[i]
+                        #print(pos, output, k)
+                        if pos[k] < len(output):
+                            if len(output[0]) > len(output[pos[k]]):
+                                for _ in range(len(output[0])-len(output[pos[k]])):
+                                    output[pos[k]].append(None)
+                            
+                            if output[pos[k]][k] == None:
+                                if type(dic[i]) == str:
+                                    dic[i] = dic[i].replace("\n", " ")
+                                output[pos[k]][k] = dic[i]
+                                pos[k] += 1
                         else:
                             t = [None] * len(output[0])
-                            output.append(t)
+                            for i in range(pos[k] - len(output)):
+                                output.append(t)
+                            if type(dic[i]) == str:
+                                dic[i] = dic[i].replace("\n", " ")
                             output[-1][k] = dic[i]
-                        
+                            pos[k] = len(output) + 1
+                            output.append(t)
                         break
     else:
         for v in dic.keys():
             for i in range(len(output[0])):
                 if output[0][i] == prev:
-                    if len(output[0]) > len(output[-1]):
-                        for _ in range(len(output[0])-len(output[-1])):
-                            output[-1].append(None)
+                    #print(i, pos, len(output))
+                    if pos[i] < len(output):
+                        if len(output[0]) > len(output[pos[i]]):
+                            for _ in range(len(output[0])-len(output[pos[i]])):
+                                output[pos[i]].append(None)
 
-                    if output[-1][i] == None:
-                        output[-1][i] = v
+                        if output[pos[i]][i] == None:
+                            if type(dic[v]) == OrderedDict or type(dic[v]) == dict:
+                                if type(v) == str:
+                                    v = v.replace("\n", " ")
+                                output[pos[i]][i] = v
+                                pos[i] += 1
+                            else:
+                                o = str(v)+": "+str(dic[v])
+                                o = o.replace("\n", " ")
+                                output[pos[i]][i] = o
+                                pos[i] += 1
                     else:
                         t = [None] * len(output[0])
-                        output.append(t)
-                        output[-1][i] = v
+                        for i in range(pos[i] - len(output)):
+                            output.append(t)
+                        if type(dic[v]) == OrderedDict or type(dic[v]) == dict:
+                            if type(v) == str:
+                                v = v.replace("\n", " ")
+                            output[-1][i] = v
+                            pos[i] = len(output) + 1
+                            output.append(t)
+                        else:
+                            o = str(v)+": "+str(dic[v])
+                            o = o.replace("\n", " ")
+                            output[-1][i] = o
+                            pos[i] = len(output) + 1
+                            output.append(t)
                     
                     break
 
-            if type(dic[v]) == OrderedDict:
+            if type(dic[v]) == OrderedDict or type(dic[v]) == dict:
                 dic[v] = dict(dic[v])
                 newlayer = layer+1
-                output = dicRec(dic[v], output, newlayer)
+                output, pos = dicRec(dic[v], output, newlayer, None, pos)
 
-    return output
+
+    return output, pos
 
 #### Backend Stuff - NOT FOR ANSH Ends ####
 
@@ -110,7 +164,7 @@ def metaData(csvfile):
         temp["title"] = col
         temp["type"] = df[col].dtypes.name
         if df[col].dtypes.name == "int64" or df[col].dtypes.name == "float64":
-            temp["avg"] = str(df[col].mean())
+            temp["avg"] = str(round(df[col].mean(), 2))
             temp["max"] = str(df[col].max())
             temp["min"] = str(df[col].min())
         else:
@@ -154,7 +208,7 @@ def jsonTocsv(jsonfile, csvfile):
     output = []
 
     layer = 0
-    output = dicRec(data, output, layer)
+    output, pos = dicRec(data, output, layer)
 
     with open(csvfile, "w", newline="", encoding="utf8") as f:
         writer = csv.writer(f)
@@ -171,7 +225,7 @@ def xmlTocsv(xmlFile, csvfile):
     data = dict(xmltodict.parse(xmlstr))
     output = []
     layer = 0
-    output = dicRec(data, output, layer)
+    output, pos = dicRec(data, output, layer)
 
     with open(csvfile, "w", newline="", encoding="utf8") as f:
         writer = csv.writer(f)
@@ -286,7 +340,7 @@ def columnRep(csvfile, graph, pkey):
         bins = (mx - mn)
     elif type(data[1]) == str:
         bins = len(data.unique())
-    print(bins)
+    #print(bins)
     fig = plt.hist(data, bins=bins)
     plt.gca().set(title=str(pkey)+'Frequency Histogram', ylabel='Frequency', xlabel = str(pkey))
     #plt.show()
@@ -315,15 +369,14 @@ def columnComp(csvfile, graph, colx, cols):
 
 
 #### Testing ####
-csvfile = "dontDeleteAnsh.csv"
-jsonfile = "testdata.json"
+csvfile = "drake.csv"
+jsonfile = "drake.json"
 xmlfile = "testdata.xml"
-columnComp(csvfile, "graph", "Age", "Age_noOut")
-
+#jsonTocsv(jsonfile, csvfile)
 """
 metaData(csvfile)
 #csvTojson(csvfile, jsonfile, "ID")
-#jsonToxml(jsonfile, xmlfile)
+jsonToxml(jsonfile, xmlfile)
 xmlTocsv(xmlfile, csvfile)
 outlier(csvfile, "Age", 21, 21)
 print(nullValues(csvfile, "Age_noOut", 2, "Maximum"))
