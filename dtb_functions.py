@@ -105,19 +105,28 @@ def metaData(csvfile):
     df = pd.read_csv(csvfile)
     for col in df.columns:
         temp = {}
-        temp["Title"] = col
-        temp["Type"] = df[col].dtypes.name
+        temp["title"] = col
+        temp["type"] = df[col].dtypes.name
         if df[col].dtypes.name == "int64" or df[col].dtypes.name == "float64":
-            temp["Average"] = df[col].mean()
-            temp["Max"] = df[col].max()
-            temp["Min"] = df[col].min()
+            temp["avg"] = str(df[col].mean())
+            temp["max"] = str(df[col].max())
+            temp["min"] = str(df[col].min())
         else:
-            temp["Average"] = "NA"
-            temp["Max"] = "NA"
-            temp["Min"] = "NA"
+            temp["avg"] = "NA"
+            temp["max"] = "NA"
+            temp["min"] = "NA"
         output.append(temp)
 
-    return output
+    return output, len(df.index)
+
+def getColumnPage(csvfile, col, page):
+    output = []
+    df = pd.read_csv(csvfile)[col]
+    maxlen = len(df.index)
+    l = page * 25
+    r = min((page + 1) * 25, maxlen - 1)
+    df = df.iloc[l:r]
+    return list(df)
 
 
 #### Format Conversion ####
