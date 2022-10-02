@@ -269,17 +269,18 @@ def nullValues(csvfile, pKey, method, replacement = None):
 def columnRep(csvfile, graph, pkey):
     df = pd.read_csv(csvfile)
     data = df[pkey]
+    data_ls = list(data)
     bins = 0
-    if type(data[1]) == int or type(data[1]) == float:
+    if type(data_ls[1]) == int or type(data_ls[1]) == float:
         mx = data.max()
         mn = data.min()
         bins = (mx - mn)
     elif type(data[1]) == str:
         bins = len(data.unique())
-
+    print(bins)
     fig = plt.hist(data, bins=bins)
     plt.gca().set(title=str(pkey)+'Frequency Histogram', ylabel='Frequency', xlabel = str(pkey))
-    plt.show()
+    #plt.show()
     return fig
 
 def coorelation_analysis(csvfile, cols,title='Coorelation Analysis',size=(12,12)):
@@ -289,13 +290,16 @@ def coorelation_analysis(csvfile, cols,title='Coorelation Analysis',size=(12,12)
     df_corr = df[cols].corr()
     fig = sns.heatmap(df_corr,annot=True,cmap='RdBu_r')
     axes.title.set_text(title)
+    #plt.show()
     return fig
 
 
 def columnComp(csvfile, graph, colx, cols):
     df = pd.read_csv(csvfile)
-    fig = plt.plot(x=df[colx], y=df[cols], figsize=(10,5), grid=True)
-    plt.legend(loc='best')
+    plt.figure(figsize=(10,5))
+    fig = plt.plot(df[colx], df[cols])
+    #plt.legend(loc='best')
+    #plt.show()
     return fig
 
 #### Data Visualization Ends ####
@@ -305,6 +309,7 @@ def columnComp(csvfile, graph, colx, cols):
 csvfile = "dontDeleteAnsh.csv"
 jsonfile = "testdata.json"
 xmlfile = "testdata.xml"
+columnComp(csvfile, "graph", "Age", "Age_noOut")
 
 """
 metaData(csvfile)
