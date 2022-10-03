@@ -44,7 +44,6 @@ def listTodic(lines, primeKey = None):
     return output
 
 def dicRec(dic, output, layer, prev = None, pos = []):
-
     if type(dic) == list:
         if type(dic[0]) == dict or type(dic[0]) == OrderedDict:
             for e in dic:
@@ -67,7 +66,7 @@ def dicRec(dic, output, layer, prev = None, pos = []):
                     if type(i) == str:
                         i = i.replace("\n", " ")
                     output[0].append(i)
-                    pos.append(max(pos))
+                    pos.append(layer - 1)
                     if max(pos) > len(output):
                         for z in range(max(pos) - len(output)):
                             t = [None] * len(output[0])
@@ -96,16 +95,19 @@ def dicRec(dic, output, layer, prev = None, pos = []):
                                 pos[k] += 1
                         else:
                             t = [None] * len(output[0])
-                            for i in range(pos[k] - len(output)):
+                            for _ in range(pos[k] - (len(output)-1)):
                                 output.append(t)
+                            #print(dic, i)
                             if type(dic[i]) == str:
                                 dic[i] = dic[i].replace("\n", " ")
-                            output[-1][k] = dic[i]
-                            pos[k] = len(output) + 1
+                            output[pos[k]][k] = dic[i]
+                            pos[k]+=1
+                            t = [None] * len(output[0])
                             output.append(t)
                         break
     else:
         for v in dic.keys():
+            #print(pos)
             for i in range(len(output[0])):
                 if output[0][i] == prev:
                     #print(i, pos, len(output))
@@ -127,19 +129,21 @@ def dicRec(dic, output, layer, prev = None, pos = []):
                                 pos[i] += 1
                     else:
                         t = [None] * len(output[0])
-                        for i in range(pos[i] - len(output)):
+                        for _ in range(pos[i] - (len(output)-1)):
                             output.append(t)
                         if type(dic[v]) == OrderedDict or type(dic[v]) == dict:
                             if type(v) == str:
                                 v = v.replace("\n", " ")
-                            output[-1][i] = v
-                            pos[i] = len(output) + 1
+                            output[pos[i]][i] = v
+                            pos[i] += 1
+                            t = [None] * len(output[0])
                             output.append(t)
                         else:
                             o = str(v)+": "+str(dic[v])
                             o = o.replace("\n", " ")
-                            output[-1][i] = o
-                            pos[i] = len(output) + 1
+                            output[pos[i]][i] = o
+                            pos[i] += 1
+                            t = [None] * len(output[0])
                             output.append(t)
                     
                     break
@@ -148,7 +152,6 @@ def dicRec(dic, output, layer, prev = None, pos = []):
                 dic[v] = dict(dic[v])
                 newlayer = layer+1
                 output, pos = dicRec(dic[v], output, newlayer, None, pos)
-
 
     return output, pos
 
@@ -369,8 +372,8 @@ def columnComp(csvfile, graph, colx, cols):
 
 
 #### Testing ####
-csvfile = "drake.csv"
-jsonfile = "drake.json"
+csvfile = "testdata.csv"
+jsonfile = "testdata.json"
 xmlfile = "testdata.xml"
 #jsonTocsv(jsonfile, csvfile)
 """
