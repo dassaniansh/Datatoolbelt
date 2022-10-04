@@ -370,6 +370,19 @@ def columnComp(csvfile, graph, colx, cols):
 
 #### Data Visualization Ends ####
 
+#### Data Processing Begins ####
+
+def columnCreation(csvfile, col1, col2, eq, newCol = "newCol"):
+    df = pd.read_csv(csvfile)
+    eq.replace("col1", col1)
+    eq.replace("col2", col2)
+    eq = newCol+" = "+eq
+    df.eval(eq, inplace = True)
+
+    df.to_csv(csvfile, encoding='utf-8', index=False)
+    return csvfile
+
+#### Data Processing Ends ####
 
 #### Testing ####
 csvfile = "testdata.csv"
