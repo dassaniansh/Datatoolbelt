@@ -1,5 +1,5 @@
 from tokenize import String
-from flask import Flask, jsonify, render_template, request
+from flask import make_response, Response, Flask, jsonify, render_template, request, send_file
 from sklearn.utils import column_or_1d
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
@@ -113,6 +113,33 @@ def fetch_column():
     page = request.json['page']
     return {'values': getColumnPage(taskTofile[taskId]['path'], col, page)}
 
+@app.route('/function', methods=['POST'])
+def operate():
+    print(request.json)
+    operation = request.json['operation']
+    taskId = request.json['taskId']
+    params = request.json['params']
+    if operation == 'convert':
+        if params['type'] == 'json':
+            resp = csvTojson(taskTofile[taskId]['path'])
+            res = Response(resp, status=200, mimetype='application/json')
+            return res
+        elif params['type'] == 'csv':
+            return send_file(taskTofile[taskId]['path'], mimetype='text/csv', download_name=taskTofile[taskId]['name'])
+        elif params['type'] == 'xml':
+            xmlf = csvToxml(taskTofile[taskId]['path'])
+            fname = taskTofile[taskId]['name']
+            fname = '.'.join(fname.split('.')[:-1]) + '.xml'
+            return send_file(xmlf, mimetype='application/xml', download_name=fname)
+    elif operation == 'clean':
+        pass
+    elif operation == 'visualize':
+        pass
+    elif operation == 'analyze':
+        pass
+    else:
+        return "Invalid Input", 400
+    return 'done'
 
 # main driver function
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
 #### Library Imports ####
 import csv
+from io import BytesIO
 import json
 import xmltodict
 import sys
@@ -190,18 +191,15 @@ def getColumnPage(csvfile, col, page):
 
 #### Format Conversion ####
 
-def csvTojson(csvfile, jsonfile, primeKey = None):
+def csvTojson(csvfile, primeKey = None):
     f = open(csvfile, "r", encoding="utf8")
     lines = f.readlines()
     f.close()
 
     output = listTodic(lines, primeKey)
 
-    with open(jsonfile, "w", encoding="utf8") as outfile:
-        json.dump(output, outfile)
+    return json.dumps(output)
 
-    return jsonfile
-    
 
 def jsonTocsv(jsonfile, csvfile):
     data = {}
@@ -249,17 +247,18 @@ def xmlTojson(xmlFile, jsonfile):
     return jsonfile
 
 
-def csvToxml(csvfile, xmlFile, primeKey=None):
+def csvToxml(csvfile, primeKey=None):
     f = open(csvfile, "r", encoding="utf8")
     lines = f.readlines()
     f.close()
 
     data = listTodic(lines, primeKey)
-    output = xmltodict.unparse(data, pretty=True)
+    output = xmltodict.unparse(data, pretty=True).encode('utf-8')
 
-    f = open(xmlFile, "w")
+    f = BytesIO()
     f.write(output)
-    f.close()
+    f.seek(0)
+    return BytesIO(f.read())
 
 
 def jsonToxml(jsonfile, xmlFile):
