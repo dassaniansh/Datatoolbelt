@@ -1,4 +1,5 @@
 from tokenize import String
+from cv2 import norm
 from flask import make_response, Response, Flask, jsonify, render_template, request, send_file
 from sklearn.utils import column_or_1d
 from werkzeug.utils import secure_filename
@@ -119,6 +120,7 @@ def operate():
     operation = request.json['operation']
     taskId = request.json['taskId']
     params = request.json['params']
+    method = request.json['method']
     if operation == 'convert':
         if params['type'] == 'json':
             resp = csvTojson(taskTofile[taskId]['path'])
@@ -131,15 +133,35 @@ def operate():
             fname = taskTofile[taskId]['name']
             fname = '.'.join(fname.split('.')[:-1]) + '.xml'
             return send_file(xmlf, mimetype='application/xml', download_name=fname)
-    elif operation == 'clean':
-        pass
-    elif operation == 'visualize':
-        pass
-    elif operation == 'analyze':
-        pass
+    elif operation == 'cleaning':
+        if method == 'normalization':
+            col = params['col']
+            rmin = float(params['min'])
+            rmax = float(params['max'])
+            normalization(taskTofile[taskId]['path'], col, rmin, rmax)        
+        elif method == 'outlier':
+            pass
+        elif method == 'null-value':
+            pass
+    elif operation == 'visualization':
+        if method == 'columnwise':
+            pass
+        elif method == 'heatmap':
+            pass
+        elif method == 'column-comparison':
+            pass
+    elif operation == 'processing':
+        if method == 'feature-creation':
+            pass
+        if method == 'classification':
+            pass
+        if method == 'feature-reduction':
+            pass
+        if method == 'clustering':
+            pass
     else:
         return "Invalid Input", 400
-    return 'done'
+    return 'done', 200
 
 # main driver function
 if __name__ == '__main__':
