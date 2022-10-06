@@ -334,7 +334,7 @@ def nullValues(csvfile, pKey, method, replacement = None):
 #### Data Cleaning Ends ####
 #### Data Visualization ####
 
-def columnRep(csvfile, graph, pkey):
+def columnRep(csvfile, pkey):
     df = pd.read_csv(csvfile)
     data = df[pkey]
     data_ls = list(data)
@@ -346,33 +346,51 @@ def columnRep(csvfile, graph, pkey):
     elif type(data[1]) == str:
         bins = len(data.unique())
     #print(bins)
-    fig = plt.hist(data, bins=bins)
+    plt.hist(data, bins=bins)
     plt.gca().set(title=str(pkey)+'Frequency Histogram', ylabel='Frequency', xlabel = str(pkey))
-    #plt.show()
-    return fig
+
+    buf = BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    return buf
 
 def coorelation_analysis(csvfile, cols,title='Coorelation Analysis',size=(12,12)):
     df = pd.read_csv(csvfile)
     cols = sorted(cols)
     fig,axes = plt.subplots(1,1,figsize=size)
     df_corr = df[cols].corr()
-    fig = sns.heatmap(df_corr,annot=True,cmap='RdBu_r')
+    sns.heatmap(df_corr,annot=True,cmap='RdBu_r')
     axes.title.set_text(title)
-    #plt.show()
-    return fig
+    
+    buf = BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    return buf
 
 
-def columnComp(csvfile, graph, colx, cols):
+def columnComp(csvfile, colx, cols):
     df = pd.read_csv(csvfile)
     plt.figure(figsize=(10,5))
-    fig = plt.plot(df[colx], df[cols])
+    plt.plot(df[colx], df[cols])
     #plt.legend(loc='best')
-    #plt.show()
-    return fig
+    
+    buf = BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    return buf
 
 #### Data Visualization Ends ####
 
 #### Data Processing Begins ####
+"""
+csvfile = 'path/to/csv/file'
+variables = {
+    'x': 'Identifier',
+    'y': 'Identifier2'
+}
+eq = 'x - y'
+columnCreation(csvfile, variables, eq)
+"""
 
 def columnCreation(csvfile, col1, col2, eq, newCol = "newCol"):
     df = pd.read_csv(csvfile)
@@ -380,7 +398,6 @@ def columnCreation(csvfile, col1, col2, eq, newCol = "newCol"):
     eq.replace("col2", col2)
     eq = newCol+" = "+eq
     df.eval(eq, inplace = True)
-
     df.to_csv(csvfile, encoding='utf-8', index=False)
     return csvfile
 

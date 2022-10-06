@@ -130,9 +130,7 @@ def operate():
             return send_file(taskTofile[taskId]['path'], mimetype='text/csv', download_name=taskTofile[taskId]['name'])
         elif params['type'] == 'xml':
             xmlf = csvToxml(taskTofile[taskId]['path'])
-            fname = taskTofile[taskId]['name']
-            fname = '.'.join(fname.split('.')[:-1]) + '.xml'
-            return send_file(xmlf, mimetype='application/xml', download_name=fname)
+            return send_file(xmlf, mimetype='application/xml')
     elif operation == 'cleaning':
         if method == 'normalization':
             col = params['col']
@@ -145,17 +143,35 @@ def operate():
             rmax = float(params['max'])
             outlier(taskTofile[taskId]['path'], col, rmin, rmax) 
         elif method == 'null-value':
-            pass
-    elif operation == 'visualization':
+            col = params['col']
+            replacement = params['replace']
+            method = 1 if replacement == 'drop' else 2
+            nullValues(taskTofile[taskId]['path'], col, method, replacement)
+    elif operation == 'visualization': 
         if method == 'columnwise':
-            pass
+            col = params['col']
+            graph = columnRep(taskTofile[taskId]['path'], col)
+            return send_file(graph, mimetype='image/png')
         elif method == 'heatmap':
-            pass
+            cols = params['cols']
+            graph = coorelation_analysis(taskTofile[taskId]['path'], cols)
+            return send_file(graph, mimetype='image/png')
         elif method == 'column-comparison':
-            pass
+            cols = params['cols']
+            col1 = cols[0]
+            col2 = cols[1]
+            graph = columnComp(taskTofile[taskId]['path'], col1, col2)
+            return send_file(graph, mimetype='image/png')
     elif operation == 'processing':
         if method == 'feature-creation':
-            pass
+            eq = params['eq']
+            variables = params['variables']
+            var = {}
+            for v in variables:
+                if v['var'] == '':
+                    continue
+                var[v['var']] = v['col']['value']
+            columnCreation(taskTofile[taskId]['path'], var, eq)
         if method == 'classification':
             pass
         if method == 'feature-reduction':
