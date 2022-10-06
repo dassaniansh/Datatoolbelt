@@ -24,8 +24,9 @@ def listTodic(lines, primeKey = None):
         for i in range(len(lines[l])):
             if lines[l][i][0] == " " or lines[l][i][0] == "\n":
                 lines[l][i] = lines[l][i][1:]
-            if lines[l][i][-1] == " " or lines[l][i][-1] == "\n":
-                lines[l][i] = lines[l][i][:-1]
+            if lines[l][i] != "":
+                if lines[l][i][-1] == " " or lines[l][i][-1] == "\n":
+                    lines[l][i] = lines[l][i][:-1]
     
     if primeKey != None:
         for i in range(len(lines[0])):
@@ -386,10 +387,10 @@ def columnCreation(csvfile, col1, col2, eq, newCol = "newCol"):
 #### Data Processing Ends ####
 
 #### Testing ####
-csvfile = "testdata.csv"
-jsonfile = "testdata.json"
+csvfile = "210747.csv"
+jsonfile = "210747.json"
 xmlfile = "testdata.xml"
-#jsonTocsv(jsonfile, csvfile)
+#print(csvTojson(csvfile, jsonfile))
 """
 metaData(csvfile)
 #csvTojson(csvfile, jsonfile, "ID")
