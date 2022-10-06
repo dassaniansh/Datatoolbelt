@@ -169,8 +169,8 @@ def metaData(csvfile):
         temp["type"] = df[col].dtypes.name
         if df[col].dtypes.name == "int64" or df[col].dtypes.name == "float64":
             temp["avg"] = str(round(df[col].mean(), 2))
-            temp["max"] = str(df[col].max())
-            temp["min"] = str(df[col].min())
+            temp["max"] = str(round(df[col].max(), 2))
+            temp["min"] = str(round(df[col].min(), 2))
         else:
             temp["avg"] = "NA"
             temp["max"] = "NA"
@@ -180,12 +180,14 @@ def metaData(csvfile):
     return output, len(df.index)
 
 def getColumnPage(csvfile, col, page):
-    output = []
     df = pd.read_csv(csvfile)[col]
     maxlen = len(df.index)
     l = page * 25
     r = min((page + 1) * 25, maxlen - 1)
     df = df.iloc[l:r]
+    if np.issubdtype(df.dtype, np.number):
+        df = df.round(decimals=2)
+    df = df.fillna('')
     return list(df)
 
 

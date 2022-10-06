@@ -120,7 +120,7 @@ def operate():
     operation = request.json['operation']
     taskId = request.json['taskId']
     params = request.json['params']
-    method = request.json['method']
+    method = request.json['method'] if 'method' in request.json else ''
     if operation == 'convert':
         if params['type'] == 'json':
             resp = csvTojson(taskTofile[taskId]['path'])
@@ -140,7 +140,10 @@ def operate():
             rmax = float(params['max'])
             normalization(taskTofile[taskId]['path'], col, rmin, rmax)        
         elif method == 'outlier':
-            pass
+            col = params['col']
+            rmin = float(params['min'])
+            rmax = float(params['max'])
+            outlier(taskTofile[taskId]['path'], col, rmin, rmax) 
         elif method == 'null-value':
             pass
     elif operation == 'visualization':
