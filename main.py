@@ -151,17 +151,17 @@ def operate():
         if method == 'columnwise':
             col = params['col']
             graph = columnRep(taskTofile[taskId]['path'], col)
-            return send_file(graph, mimetype='image/png')
+            return send_file(graph, mimetype='application/octet-stream')
         elif method == 'heatmap':
             cols = params['cols']
             graph = coorelation_analysis(taskTofile[taskId]['path'], cols)
-            return send_file(graph, mimetype='image/png')
+            return send_file(graph, mimetype='application/octet-stream')
         elif method == 'column-comparison':
             cols = params['cols']
             col1 = cols[0]
             col2 = cols[1]
             graph = columnComp(taskTofile[taskId]['path'], col1, col2)
-            return send_file(graph, mimetype='image/png')
+            return send_file(graph, mimetype='application/octet-stream')
     elif operation == 'processing':
         if method == 'feature-creation':
             eq = params['eq']
