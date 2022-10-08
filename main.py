@@ -114,6 +114,26 @@ def fetch_column():
     page = request.json['page']
     return {'values': getColumnPage(taskTofile[taskId]['path'], col, page)}
 
+@app.route('/update-cell', methods=['POST'])
+def update_cell():
+    print(request.json)
+    taskId = request.json['taskId']
+    col = request.json['col']
+    page = request.json['page']
+    idx = request.json['idx']
+    newVal = request.json['newVal']
+    updateCell(taskTofile[taskId]['path'], col, page, idx, newVal)
+    return 'done'
+
+@app.route('/update-head', methods=['POST'])
+def update_head():
+    print(request.json)
+    taskId = request.json['taskId']
+    col = request.json['col']
+    newVal = request.json['newVal']
+    updateHead(taskTofile[taskId]['path'], col, newVal)
+    return 'done'
+
 @app.route('/function', methods=['POST'])
 def operate():
     print(request.json)

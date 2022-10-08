@@ -191,6 +191,20 @@ def getColumnPage(csvfile, col, page):
     df = df.fillna('')
     return list(df)
 
+def updateHead(csvfile, col, newVal):
+    df = pd.read_csv(csvfile)
+    df = df.rename(columns={col: newVal})
+    df.to_csv(csvfile, encoding='utf-8', index=False)
+    return csvfile
+
+def updateCell(csvfile, col, page, idx, newVal):
+    df = pd.read_csv(csvfile)
+    if isinstance(newVal, str) and len(newVal) == 0:
+        newVal = np.NaN
+    df.at[page*25 + idx, col] = newVal
+    print(df.at[page*25 + idx, col])
+    df.to_csv(csvfile, encoding='utf-8', index=False)
+    return csvfile
 
 #### Format Conversion ####
 
