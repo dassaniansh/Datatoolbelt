@@ -406,10 +406,10 @@ eq = 'x - y'
 columnCreation(csvfile, variables, eq)
 """
 
-def columnCreation(csvfile, cols, eq, newCol = "newCol"):
+def columnCreation(csvfile, variables, eq, newCol = "newCol"):
     df = pd.read_csv(csvfile)
-    for i in cols:
-        eq.replace(i, "df[\""+i+"\"]")
+    for i in variables:
+        eq.replace(i, "df[\""+variables[i]+"\"]")
     eq = newCol+" = "+eq
     df.eval(eq, inplace = True)
     df.to_csv(csvfile, encoding='utf-8', index=False)
