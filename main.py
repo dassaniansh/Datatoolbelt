@@ -134,6 +134,23 @@ def update_head():
     updateHead(taskTofile[taskId]['path'], col, newVal)
     return 'done'
 
+@app.route('/del-col', methods=['POST'])
+def del_row():
+    print(request.json)
+    taskId = request.json['taskId']
+    col = request.json['col']
+    removeCol(taskTofile[taskId]['path'], col)
+    return 'done'
+
+@app.route('/del-row', methods=['POST'])
+def del_col():
+    print(request.json)
+    taskId = request.json['taskId']
+    page = request.json['page']
+    idx = request.json['idx']
+    removeRow(taskTofile[taskId]['path'], page, idx)
+    return 'done'
+
 @app.route('/function', methods=['POST'])
 def operate():
     print(request.json)

@@ -202,8 +202,20 @@ def updateCell(csvfile, col, page, idx, newVal):
     if isinstance(newVal, str) and len(newVal) == 0:
         newVal = np.NaN
     df.at[page*25 + idx, col] = newVal
-    print(df.at[page*25 + idx, col])
     df.to_csv(csvfile, encoding='utf-8', index=False)
+    return csvfile
+
+def removeCol(csvfile, col):
+    df = pd.read_csv(csvfile)
+    df = df.drop(col, axis=1)
+    df.to_csv(csvfile, encoding='utf-8', index=False)
+    return csvfile
+
+def removeRow(csvfile, page, idx):
+    df = pd.read_csv(csvfile)
+    df = df.drop(page*25 + idx)
+    df.to_csv(csvfile, encoding='utf-8', index=False)
+    
     return csvfile
 
 #### Format Conversion ####
