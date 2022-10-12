@@ -1,7 +1,7 @@
 import os
 import glob
 
-files = glob.glob('instances/uploads')
+files = glob.glob('instance/uploads/*')
 for f in files:
     print(f'deleting {f}...')
     os.remove(f)
