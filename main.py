@@ -8,6 +8,7 @@ from datetime import datetime
 from dtb_functions import *
 from flask_cors import CORS
 import os
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -16,26 +17,32 @@ uploads_dir = os.path.join(app.instance_path, 'uploads')
 os.makedirs(uploads_dir, exist_ok=True)
 
 task_id = 0
-taskTofile = {
-  "210747": {
-    "dt": "2022-10-01", 
-    "name": "username.csv", 
-    "path": "E:\\dtb\\Datatoolbelt\\instance\\uploads\\210747",
-    "size": 176
-  },
-  "190854": {
-    "dt": "2022-10-02", 
-    "name": "cars.csv", 
-    "path": "E:\\dtb\\Datatoolbelt\\instance\\uploads\\190854", 
-    "size": 22663
-  }, 
-  "194319": {
-    "dt": "2022-10-02", 
-    "name": "drake_data.csv", 
-    "path": "E:\\dtb\\Datatoolbelt\\instance\\uploads\\194319", 
-    "size": 800611
-  }, 
-}
+something = "something.json"
+taskTofile = {}
+if os.path.isfile(something):
+    with open(something, 'r', encoding="utf8") as json_file:
+        taskTofile = json.load(json_file)
+else:
+    taskTofile = {
+    "210747": {
+        "dt": "2022-10-01", 
+        "name": "username.csv", 
+        "path": "E:\\dtb\\Datatoolbelt\\instance\\uploads\\210747",
+        "size": 176
+    },
+    "190854": {
+        "dt": "2022-10-02", 
+        "name": "cars.csv", 
+        "path": "E:\\dtb\\Datatoolbelt\\instance\\uploads\\190854", 
+        "size": 22663
+    }, 
+    "194319": {
+        "dt": "2022-10-02", 
+        "name": "drake_data.csv", 
+        "path": "E:\\dtb\\Datatoolbelt\\instance\\uploads\\194319", 
+        "size": 800611
+    }, 
+    }
 
 
 @app.route('/')
@@ -50,6 +57,7 @@ def upload_file():
 
 @app.route('/uploader', methods=['GET', 'POST'])
 def upload_files():
+    global something
     try:
         if request.method == 'POST':
             f = request.files['file']
@@ -81,6 +89,9 @@ def upload_files():
                 return task_id, 200
             else:
                 return 'Invalid file format, we only support csv, xml, json'
+
+            with open(something, "w", encoding="utf8") as outfile:
+                json.dump(taskTofile, outfile)
     except Exception as e:
         print(e)
         return 'Something wrong occured'
