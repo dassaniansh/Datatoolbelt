@@ -4,6 +4,8 @@ import time
 
 files = glob.glob('instance/uploads/*')
 for f in files:
+    if f == 'something.json':
+        continue
     x=os.stat(f)
     Result=(time.time()-x.st_mtime)
     print(f'File\'s age is {Result}')
