@@ -17,7 +17,7 @@ uploads_dir = os.path.join(app.instance_path, 'uploads')
 os.makedirs(uploads_dir, exist_ok=True)
 
 task_id = 0
-something = "something.json"
+something = os.path.join(uploads_dir, secure_filename('something.json'))
 taskTofile = {}
 if os.path.isfile(something):
     with open(something, 'r', encoding="utf8") as json_file:
@@ -86,12 +86,11 @@ def upload_files():
                     'size': os.stat(fileWithPath).st_size,
                     'dt': str(datetime.now().date())
                 }
+                with open(something, "w", encoding="utf8") as outfile:
+                    json.dump(taskTofile, outfile)
                 return task_id, 200
             else:
                 return 'Invalid file format, we only support csv, xml, json'
-
-            with open(something, "w", encoding="utf8") as outfile:
-                json.dump(taskTofile, outfile)
     except Exception as e:
         print(e)
         return 'Something wrong occured'
