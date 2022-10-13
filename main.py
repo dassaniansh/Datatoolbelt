@@ -87,7 +87,7 @@ def upload_files():
                     'dt': str(datetime.now().date())
                 }
                 with open(something, "w", encoding="utf8") as outfile:
-                    json.dump(taskTofile, outfile)
+                    json.dump(taskTofile, outfile, indent=4)
                 return task_id, 200
             else:
                 return 'Invalid file format, we only support csv, xml, json'
