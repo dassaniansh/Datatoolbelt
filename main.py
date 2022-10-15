@@ -104,7 +104,12 @@ def fetch():
 @app.route('/fetch/<task_id_for_file>')
 def fetch_file(task_id_for_file):
     # return meta data from database
-    output, rows = metaData(taskTofile[task_id_for_file]['path'])
+    if task_id_for_file not in taskTofile:
+        return 'not_found', 400
+    path = taskTofile[task_id_for_file]['path']
+    if not os.path.exists(path):
+        return 'doesnt_exist', 400
+    output, rows = metaData(path)
     metadata = {
       'name': taskTofile[task_id_for_file]['name'],
       'size': taskTofile[task_id_for_file]['size'],
